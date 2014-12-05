@@ -30,7 +30,7 @@
         }
 </script>
 
-<script id="Axis-vs" type="x-shader/x-vertex">
+<script id="Simple-vs" type="x-shader/x-vertex">
     attribute vec3 aVertexPosition;
     attribute vec4 aVertexColor;
 
@@ -41,13 +41,12 @@
     void main(void) {
 
         gl_Position = uMVPMat * vec4(aVertexPosition.xyz, 1.0);
-
         vColor = aVertexColor;
     }
 
 </script>
 
-<script id="Axis-fs" type="x-shader/x-fragment">
+<script id="Simple-fs" type="x-shader/x-fragment">
     precision mediump float;
 
     varying vec4 vColor;
@@ -149,8 +148,8 @@
     <br/>
     <div id="output"> </div>
     <br/>
-    <canvas id="videoGL" width="320" height="240" style="visibility: visible;"></canvas>
-    <video id="monitor" autoplay width="320" height="240" style="visibility: hidden;"></video>
+    <canvas id="videoGL" width="320" height="320" style="visibility: visible;"></canvas>
+    <video id="monitor" autoplay width="320" height="320" style="visibility: hidden;"></video>
     <canvas id="videoImage" width="256" height="256" style="visibility: hidden;"></canvas>
 </body>
 

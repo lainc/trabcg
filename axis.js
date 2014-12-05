@@ -467,7 +467,7 @@ function webGLStart() {
         }
     initCameraTexture();
 
-    shaderAxis                  = initShaders("Axis", gl);
+    shaderAxis                  = initShaders("Simple", gl);
     shaderAxis.vPositionAttr    = gl.getAttribLocation(shaderAxis, "aVertexPosition");
     shaderAxis.vColorAttr       = gl.getAttribLocation(shaderAxis, "aVertexColor");
     shaderAxis.uMVPMat          = gl.getUniformLocation(shaderAxis, "uMVPMat");
