@@ -1,0 +1,157 @@
+<html>
+
+<head>
+<title>MATA65 - Computação Gráfica</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+<script id="baseImage-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec2 aVertexTexture;
+
+    uniform mat4 uMVPMat;
+
+    varying vec2 vTextureCoord;
+
+    void main(void) {
+        gl_Position = uMVPMat* vec4(aVertexPosition.xyz, 1.0);
+        vTextureCoord = aVertexTexture;
+    }
+</script>
+
+<script id="baseImage-fs" type="x-shader/x-fragment">
+    precision mediump float;
+
+    uniform sampler2D uSampler;
+
+    varying vec2 vTextureCoord;
+
+    void main(void) {
+        gl_FragColor = texture2D(uSampler, vTextureCoord);
+        }
+</script>
+
+<script id="Axis-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec4 aVertexColor;
+
+    uniform mat4 uMVPMat;
+
+    varying vec4 vColor;
+
+    void main(void) {
+
+        gl_Position = uMVPMat * vec4(aVertexPosition.xyz, 1.0);
+
+        vColor = aVertexColor;
+    }
+
+</script>
+
+<script id="Axis-fs" type="x-shader/x-fragment">
+    precision mediump float;
+
+    varying vec4 vColor;
+
+    void main(void) {
+        gl_FragColor = vColor;
+    }
+</script>
+
+<script id="normalMapping-vs" type="x-shader/x-vertex">
+    attribute vec3 aVPosition;
+    attribute vec3 aVNorm;
+    attribute vec2 aVTexCoord;
+
+    uniform mat4 uModelMat;
+    uniform mat4 uViewMat;
+    uniform mat4 uProjMat;
+    uniform mat4 uNormMat;
+
+    varying vec3 vPosW;
+    varying vec3 vNormalW;
+    varying vec2 vTextCoord;
+
+    void main(void) {
+        gl_Position = uProjMat * uViewMat * uModelMat * vec4(aVPosition.xyz, 1.0);
+        vPosW       = (uModelMat * vec4(aVPosition, 1.0)).xyz;
+        vTextCoord  = aVTexCoord;
+        vNormalW    = normalize(vec3(uNormMat * vec4(aVNorm, 1.0)));
+    }
+
+</script>
+
+<script id="normalMapping-fs" type="x-shader/x-fragment">
+    precision mediump float;
+
+    varying vec3 vPosW;
+    varying vec3 vNormalW;
+    varying vec2 vTextCoord;
+
+    uniform sampler2D uTexture;
+    uniform sampler2D uNormalMap;
+
+    uniform vec3 uCamPos;
+    uniform vec3 uL1Pos;
+    uniform vec3 uL2Pos;
+    uniform vec4 uL1Color;
+    uniform vec4 uL2Color;
+    uniform vec4 uMatAmb;
+    uniform vec4 uMatDif;
+    uniform vec4 uMatSpec;
+    uniform float uExpSpec;
+
+    void main(void) {
+        vec4 nMap     = texture2D(uNormalMap, vTextCoord);
+        vec3 vNM      = normalize(nMap.xyz);
+
+        vec4 ambient  = (uL1Color+uL2Color) * uMatAmb;
+
+        vec4 texel    = texture2D(uTexture, vTextCoord);
+
+        vec3 vL1      = normalize(uL1Pos - vPosW);
+        float teta    = max(dot(vL1, vNM), 0.0);
+        vec4 diffuse  = uL1Color * texel * teta;
+
+        vec3 vL2      = normalize(uL2Pos - vPosW);
+        teta          = max(dot(vL2, vNM), 0.0);
+        diffuse      += uL2Color * texel * teta;
+
+        vec3 vV       = normalize(uCamPos - vPosW);
+
+        vec3 vR       = normalize(reflect(-vL1, vNM));
+        float omega   = max(dot(vV, vR), 0.0);
+        vec4 specular = uL1Color * uMatSpec * pow(omega,uExpSpec);
+
+        vR            = normalize(reflect(-vL2, vNM));
+        omega         = max(dot(vV, vR), 0.0);
+        specular     += uL2Color * uMatSpec * pow(omega,uExpSpec);
+
+        gl_FragColor  = clamp(ambient + diffuse + specular, 0.0, 1.0);
+    }
+</script>
+
+<script type="text/javascript" src="lib/webgl-utils.js"></script>
+<script type="text/javascript" src="lib/cuon-matrix.js"></script>
+<script type="text/javascript" src="lib/shaders.js"></script>
+<script type="text/javascript" src="ar-libs/svd.js"></script>
+<script type="text/javascript" src="ar-libs/posit1.js"></script>
+<script type="text/javascript" src="ar-libs/cv.js"></script>
+<script type="text/javascript" src="ar-libs/aruco.js"></script>
+<script type="text/javascript" src="lib/myOBJParser.js"></script>
+<script type="text/javascript" src="lib/MaterialParser.js"></script>
+<script type="text/javascript" src="axis.js"></script>
+
+</head>
+
+<body onload="webGLStart();">
+    <h1>Trabalho</h1><br />
+    <p>Realidade Aumentada em WebGL.</p>
+    <br/>
+    <div id="output"> </div>
+    <br/>
+    <canvas id="videoGL" width="320" height="240" style="visibility: visible;"></canvas>
+    <video id="monitor" autoplay width="320" height="240" style="visibility: hidden;"></video>
+    <canvas id="videoImage" width="256" height="256" style="visibility: hidden;"></canvas>
+</body>
+
+</html>

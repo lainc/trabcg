@@ -1,0 +1,23 @@
+# Simple Material
+# Material Count: 3
+
+newmtl earth
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+map_Kd textures/Earth.png
+
+# newmtl atmosphere
+# Ns 96.078431
+# Ka 0.000000 0.000000 0.000000
+# Kd 0.640000 0.640000 0.640000
+# Ks 0.000000 0.000000 0.000000
+# map_Kd textures/Earth_Clouds_D.jpg
+
+newmtl moon
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+map_Kd textures/moonmap512.png
