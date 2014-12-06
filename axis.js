@@ -489,12 +489,12 @@ function animate() {
       imageData = videoImageContext.getImageData(0, 0, canvas.width, canvas.height);
 
         var markers = detector.detect(imageData);
-        if (markers.length != 0) {
+        if (markers.length != 0) { // se encontra marcador desenha tudo
             drawCorners(markers);
             drawId(markers);
             drawScene(markers);
             }
-        else {
+        else { // senão so desenha a imagem captada pela camera
             drawTextQuad(baseTexture, shaderBaseImage, new Matrix4().setOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
             updateScenes(markers);
             }
