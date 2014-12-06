@@ -95,7 +95,7 @@ function initTextures() {
 
 // ********************************************************
 // ********************************************************
-// forma textura a partir da imagem em filename e coloca no vetor texture
+// Forma textura a partir da imagem em filename e coloca no vetor texture
 // na posição texInd.
 function initTexture(filename, texInd) {
 
@@ -489,27 +489,16 @@ function animate() {
       imageData = videoImageContext.getImageData(0, 0, canvas.width, canvas.height);
 
         var markers = detector.detect(imageData);
-        drawCorners(markers);
-        drawId(markers);
-        drawScene(markers);
+        if (markers.length != 0) {
+            drawCorners(markers);
+            drawId(markers);
+            drawScene(markers);
+            }
+        else {
+            drawTextQuad(baseTexture, shaderBaseImage, new Matrix4().setOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
+            updateScenes(markers);
+            }
       }
-}
-
-// ********************************************************
-// ********************************************************
-function render() {
-
-    if ( video.readyState === video.HAVE_ENOUGH_DATA ) {
-        videoImageContext.drawImage( video, 0, 0, videoImage.width, videoImage.height );
-        videoTexture.needsUpdate = true;
-        imageData = videoImageContext.getImageData(0, 0, videoImage.width, videoImage.height);
-
-        var markers = detector.detect(imageData);
-
-        drawCorners(markers);
-
-        drawScene(markers);
-        }
 }
 
 // ********************************************************
@@ -548,7 +537,7 @@ function drawId(markers) {
   videoImageContext.strokeStyle = "blue";
   videoImageContext.lineWidth = 1;
 
-  for (i = 0; i !== markers.length; ++ i){
+  for (i = 0; i !== markers.length; ++ i) {
     corners = markers[i].corners;
 
     x = Infinity;

@@ -46,7 +46,7 @@ AR.Detector = function(){
 AR.Detector.prototype.detect = function(image){
   CV.grayscale(image, this.grey);
   CV.adaptiveThreshold(this.grey, this.thres, 2, 7);
-  
+
   this.contours = CV.findContours(this.thres, this.binary);
 
   this.candidates = this.findCandidates(this.contours, image.width * 0.20, 0.05, 10);
@@ -60,7 +60,7 @@ AR.Detector.prototype.findCandidates = function(contours, minSize, epsilon, minL
   var candidates = [], len = contours.length, contour, poly, i;
 
   this.polys = [];
-  
+
   for (i = 0; i < len; ++ i){
     contour = contours[i];
 
@@ -104,19 +104,19 @@ AR.Detector.prototype.notTooNear = function(candidates, minDist){
   var notTooNear = [], len = candidates.length, dist, dx, dy, i, j, k;
 
   for (i = 0; i < len; ++ i){
-  
+
     for (j = i + 1; j < len; ++ j){
       dist = 0;
-      
+
       for (k = 0; k < 4; ++ k){
         dx = candidates[i][k].x - candidates[j][k].x;
         dy = candidates[i][k].y - candidates[j][k].y;
-      
+
         dist += dx * dx + dy * dy;
       }
-      
+
       if ( (dist / 4) < (minDist * minDist) ){
-      
+
         if ( CV.perimeter( candidates[i] ) < CV.perimeter( candidates[j] ) ){
           candidates[i].tooNear = true;
         }else{
@@ -142,15 +142,15 @@ AR.Detector.prototype.findMarkers = function(imageSrc, candidates, warpSize){
     candidate = candidates[i];
 
     CV.warp(imageSrc, this.homography, candidate, warpSize);
-  
+
     CV.threshold(this.homography, this.homography, CV.otsu(this.homography) );
 
     marker = this.getMarker(this.homography, candidate);
-    if (marker){
+    if (marker && marker.id == "1001"){
       markers.push(marker);
     }
   }
-  
+
   return markers;
 };
 
@@ -162,7 +162,7 @@ AR.Detector.prototype.getMarker = function(imageSrc, candidate){
 
   for (i = 0; i < 7; ++ i){
     inc = (0 === i || 6 === i)? 1: 6;
-    
+
     for (j = 0; j < 7; j += inc){
       square = {x: j * width, y: i * width, width: width, height: width};
       if ( CV.countNonZero(imageSrc, square) > minZero){
@@ -176,20 +176,20 @@ AR.Detector.prototype.getMarker = function(imageSrc, candidate){
 
     for (j = 0; j < 5; ++ j){
       square = {x: (j + 1) * width, y: (i + 1) * width, width: width, height: width};
-      
+
       bits[i][j] = CV.countNonZero(imageSrc, square) > minZero? 1: 0;
     }
   }
 
   rotations[0] = bits;
   distances[0] = this.hammingDistance( rotations[0] );
-  
+
   pair = {first: distances[0], second: 0};
-  
+
   for (i = 1; i < 4; ++ i){
     rotations[i] = this.rotate( rotations[i - 1] );
     distances[i] = this.hammingDistance( rotations[i] );
-    
+
     if (distances[i] < pair.first){
       pair.first = distances[i];
       pair.second = i;
@@ -201,7 +201,7 @@ AR.Detector.prototype.getMarker = function(imageSrc, candidate){
   }
 
   return new AR.Marker(
-    this.mat2id( rotations[pair.second] ), 
+    this.mat2id( rotations[pair.second] ),
     this.rotate2(candidate, 4 - pair.second) );
 };
 
@@ -211,7 +211,7 @@ AR.Detector.prototype.hammingDistance = function(bits){
 
   for (i = 0; i < 5; ++ i){
     minSum = Infinity;
-    
+
     for (j = 0; j < 4; ++ j){
       sum = 0;
 
@@ -232,7 +232,7 @@ AR.Detector.prototype.hammingDistance = function(bits){
 
 AR.Detector.prototype.mat2id = function(bits){
   var id = 0, i;
-  
+
   for (i = 0; i < 5; ++ i){
     id <<= 1;
     id |= bits[i][1];
@@ -245,7 +245,7 @@ AR.Detector.prototype.mat2id = function(bits){
 
 AR.Detector.prototype.rotate = function(src){
   var dst = [], len = src.length, i, j;
-  
+
   for (i = 0; i < len; ++ i){
     dst[i] = [];
     for (j = 0; j < src[i].length; ++ j){
@@ -258,7 +258,7 @@ AR.Detector.prototype.rotate = function(src){
 
 AR.Detector.prototype.rotate2 = function(src, rotation){
   var dst = [], len = src.length, i;
-  
+
   for (i = 0; i < len; ++ i){
     dst[i] = src[ (rotation + i) % len ];
   }
