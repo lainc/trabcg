@@ -47,7 +47,6 @@ var rotMat      = new Matrix4();
 var transMat    = new Matrix4();
 var scaleMat    = new Matrix4();
 
-// ********************************************************
 var yaw         = 0.0,
     pitch       = 0.0,
     roll        = 0.0;
@@ -55,6 +54,8 @@ var yaw         = 0.0,
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 window.URL = window.URL || window.webkitURL;
 
+// ********************************************************
+// ********************************************************
 function initGL(canvas) {
 
     var gl = canvas.getContext("webgl");
@@ -72,6 +73,8 @@ function initGL(canvas) {
     return gl;
 }
 
+// ********************************************************
+// ********************************************************
 function initTextures() {
 
     texture = new Array(g_drawingInfo.mtl.length*2);
@@ -90,6 +93,8 @@ function initTextures() {
         }
 }
 
+// ********************************************************
+// ********************************************************
 // forma textura a partir da imagem em filename e coloca no vetor texture
 // na posição texInd.
 function initTexture(filename, texInd) {
@@ -116,88 +121,8 @@ function initTexture(filename, texInd) {
     image.src = filename;
 }
 
-// Read a file
-function readOBJFile(fileName, scale, reverse) {
-    var request = new XMLHttpRequest();
-
-    request.onreadystatechange = function() {
-        if (request.readyState === 4 && request.status !== 404)
-            onReadOBJFile(request.responseText, fileName, scale, reverse);
-        }
-    request.open('GET', fileName, true); // Create a request to acquire the file
-    request.send();                      // Send the request
-}
-
-// OBJ File has been read
-function onReadOBJFile(fileString, fileName, scale, reverse) {
-    var objDoc = new OBJDoc(fileName);  // Create a OBJDoc object
-    var result = objDoc.parse(fileString, scale, reverse);  // Parse the file
-    if (!result) {
-        g_objDoc        = null;
-        g_drawingInfo   = null;
-        console.log("OBJ file parsing error.");
-        return;
-        }
-
-    g_objDoc = objDoc;
-}
-
-// OBJ File has been read completly
-function onReadComplete() {
-
-    var groupModel = null;
-
-    g_drawingInfo = g_objDoc.getDrawingInfo();
-
-    for(var o = 0; o < g_drawingInfo.numObjects; o++) {
-
-        groupModel = new Object();
-
-        groupModel.vertexBuffer = gl.createBuffer();
-        if (groupModel.vertexBuffer) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, groupModel.vertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, g_drawingInfo.vertices[o], gl.STATIC_DRAW);
-            }
-        else
-            alert("ERROR: can not create vertexBuffer");
-
-        groupModel.normalBuffer = gl.createBuffer();
-        if (groupModel.normalBuffer) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, groupModel.normalBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, g_drawingInfo.normals[o], gl.STATIC_DRAW);
-            }
-        else
-            alert("ERROR: can not create normalBuffer");
-
-        groupModel.texCoordBuffer = gl.createBuffer();
-        if (groupModel.texCoordBuffer) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, groupModel.texCoordBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, g_drawingInfo.textCoords[o], gl.STATIC_DRAW);
-            }
-        else
-            alert("ERROR: can not create texCoordBuffer");
-
-        groupModel.indexBuffer = gl.createBuffer();
-        if (groupModel.indexBuffer) {
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, groupModel.indexBuffer);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, g_drawingInfo.indices[o], gl.STATIC_DRAW);
-            }
-        else
-            alert("ERROR: can not create indexBuffer");
-
-        groupModel.numObjects   = g_drawingInfo.indices[o].length;
-        groupModel.Material     = g_drawingInfo.materials[o];
-
-        model.push(groupModel);
-        }
-
-    for(var i = 0; i < g_drawingInfo.mtl.length; i++)
-        for(var j = 0; j < g_drawingInfo.mtl[i].materials.length; j++)
-            material.push(g_drawingInfo.mtl[i].materials[j]);
-
-    initTextures();
-}
-
+// ********************************************************
+// ********************************************************
 function updateScenes(markers) {
   var corners, corner, pose, i;
 
@@ -218,12 +143,6 @@ function updateScenes(markers) {
         pitch   = -Math.asin(-pose.bestRotation[1][2]);
         roll    = Math.atan2(pose.bestRotation[1][0], pose.bestRotation[1][1]);
 
-        // var r = pose.bestRotation;
-        // var e = rotMat.elements;
-        // e[0] = r[0][0];   e[4] = r[0][1];   e[8]  = r[0][2];   e[12] = 0;
-        // e[1] = r[1][0];   e[5] = r[1][1];   e[9]  = r[1][2];   e[13] = 0;
-        // e[2] = r[2][0];   e[6] = r[2][1];   e[10] = r[2][2];   e[14] = 1;
-        // e[3] = 0;         e[7] = 0;         e[11] = 0;         e[15] = 1;
         rotMat.setIdentity();
         rotMat.rotate(yaw, 0.0, 1.0, 0.0);
         rotMat.rotate(pitch, 1.0, 0.0, 0.0);
@@ -233,9 +152,6 @@ function updateScenes(markers) {
         transMat.translate(pose.bestTranslation[0], pose.bestTranslation[1], -pose.bestTranslation[2]);
         scaleMat.setIdentity();
         scaleMat.scale(modelSize, modelSize, modelSize);
-
-        // console.log("pose.bestError = " + pose.bestError);
-        // console.log("pose.alternativeError = " + pose.alternativeError);
         }
     else {
         transMat.setIdentity();
@@ -245,8 +161,10 @@ function updateScenes(markers) {
         pitch   = 0.0;
         roll    = 0.0;
         }
-};
+}
 
+// ********************************************************
+// ********************************************************
 function drawScene(markers) {
 
     var ViewMat = new Matrix4();
@@ -258,7 +176,6 @@ function drawScene(markers) {
 
     modelMat.setIdentity();
     ViewMat.setIdentity();
-    // ProjMat.setIdentity();
     ProjMat.setOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
 
     MVPMat.setIdentity();
@@ -318,6 +235,8 @@ function drawScene(markers) {
     gl.disable(gl.DEPTH_TEST);
 }
 
+// ********************************************************
+// ********************************************************
 function draw(o, shaderProgram, primitive, index) {
 
     var matAmb      = new Vector4();
@@ -415,6 +334,8 @@ function draw(o, shaderProgram, primitive, index) {
     gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
+// ********************************************************
+// ********************************************************
 function webGLStart() {
 
     if (!navigator.getUserMedia) {
@@ -557,6 +478,8 @@ function webGLStart() {
     requestAnimationFrame(tick);
 }
 
+// ********************************************************
+// ********************************************************
 function animate() {
     requestAnimationFrame( animate );
     rotEarth += deltaRot;
@@ -572,6 +495,8 @@ function animate() {
       }
 }
 
+// ********************************************************
+// ********************************************************
 function render() {
 
     if ( video.readyState === video.HAVE_ENOUGH_DATA ) {
@@ -587,6 +512,8 @@ function render() {
         }
 }
 
+// ********************************************************
+// ********************************************************
 function drawCorners(markers){
   var corners, corner, i, j;
 
@@ -613,6 +540,8 @@ function drawCorners(markers){
   }
 };
 
+// ********************************************************
+// ********************************************************
 function drawId(markers) {
   var corners, corner, x, y, i, j;
 
@@ -636,6 +565,8 @@ function drawId(markers) {
   }
 }
 
+// ********************************************************
+// ********************************************************
 function initCameraTexture() {
 
     videoTexture = gl.createTexture();
@@ -645,6 +576,8 @@ function initCameraTexture() {
     videoTexture.needsUpdate = false;
 }
 
+// ********************************************************
+// ********************************************************
 function initBaseImage() {
 
     var baseImage = new Object();
@@ -704,6 +637,8 @@ function initBaseImage() {
     return baseImage;
 }
 
+// ********************************************************
+// ********************************************************
 function initAxisVertexBuffer() {
 
     var axis    = new Object(); // Utilize Object object to return multiple buffer objects
@@ -785,6 +720,8 @@ function initAxisVertexBuffer() {
     return axis;
 }
 
+// ********************************************************
+// ********************************************************
 function drawTextQuad(o, shaderProgram, MVPMat) {
 
     try {
@@ -826,6 +763,8 @@ function drawTextQuad(o, shaderProgram, MVPMat) {
     gl.drawArrays(gl.TRIANGLES, 0, o.numItems);
 }
 
+// ********************************************************
+// ********************************************************
 function drawAxis(o, shaderProgram, MVPMat) {
 
     try {
@@ -861,6 +800,8 @@ function drawAxis(o, shaderProgram, MVPMat) {
     gl.drawArrays(gl.LINES, 0, o.numItems);
 }
 
+// ********************************************************
+// ********************************************************
 function gotStream(stream)  {
     if (window.URL) {
         video.src = window.URL.createObjectURL(stream);   }
@@ -874,6 +815,8 @@ function gotStream(stream)  {
     stream.onended = noStream;
 }
 
+// ********************************************************
+// ********************************************************
 function noStream(e) {
     var msg = "No camera available.";
 
@@ -883,4 +826,90 @@ function noStream(e) {
     document.getElementById("output").textContent = msg;
 }
 
-// TODO vê se ainda precisa VNormalW, aVNorm e uNormMat.
+// ********************************************************
+// ********************************************************
+// Read a file
+function readOBJFile(fileName, scale, reverse) {
+    var request = new XMLHttpRequest();
+
+    request.onreadystatechange = function() {
+        if (request.readyState === 4 && request.status !== 404)
+            onReadOBJFile(request.responseText, fileName, scale, reverse);
+        }
+    request.open('GET', fileName, true); // Create a request to acquire the file
+    request.send();                      // Send the request
+}
+
+// ********************************************************
+// ********************************************************
+// OBJ File has been read
+function onReadOBJFile(fileString, fileName, scale, reverse) {
+    var objDoc = new OBJDoc(fileName);  // Create a OBJDoc object
+    var result = objDoc.parse(fileString, scale, reverse);  // Parse the file
+    if (!result) {
+        g_objDoc        = null;
+        g_drawingInfo   = null;
+        console.log("OBJ file parsing error.");
+        return;
+        }
+
+    g_objDoc = objDoc;
+}
+
+// ********************************************************
+// ********************************************************
+// OBJ File has been read completly
+function onReadComplete() {
+
+    var groupModel = null;
+
+    g_drawingInfo = g_objDoc.getDrawingInfo();
+
+    for(var o = 0; o < g_drawingInfo.numObjects; o++) {
+
+        groupModel = new Object();
+
+        groupModel.vertexBuffer = gl.createBuffer();
+        if (groupModel.vertexBuffer) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, groupModel.vertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, g_drawingInfo.vertices[o], gl.STATIC_DRAW);
+            }
+        else
+            alert("ERROR: can not create vertexBuffer");
+
+        groupModel.normalBuffer = gl.createBuffer();
+        if (groupModel.normalBuffer) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, groupModel.normalBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, g_drawingInfo.normals[o], gl.STATIC_DRAW);
+            }
+        else
+            alert("ERROR: can not create normalBuffer");
+
+        groupModel.texCoordBuffer = gl.createBuffer();
+        if (groupModel.texCoordBuffer) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, groupModel.texCoordBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, g_drawingInfo.textCoords[o], gl.STATIC_DRAW);
+            }
+        else
+            alert("ERROR: can not create texCoordBuffer");
+
+        groupModel.indexBuffer = gl.createBuffer();
+        if (groupModel.indexBuffer) {
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, groupModel.indexBuffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, g_drawingInfo.indices[o], gl.STATIC_DRAW);
+            }
+        else
+            alert("ERROR: can not create indexBuffer");
+
+        groupModel.numObjects   = g_drawingInfo.indices[o].length;
+        groupModel.Material     = g_drawingInfo.materials[o];
+
+        model.push(groupModel);
+        }
+
+    for(var i = 0; i < g_drawingInfo.mtl.length; i++)
+        for(var j = 0; j < g_drawingInfo.mtl[i].materials.length; j++)
+            material.push(g_drawingInfo.mtl[i].materials[j]);
+
+    initTextures();
+}
